@@ -1,0 +1,102 @@
+model:
+  target: models.second_stage_van_v4.S2Model
+  monitor: val/psnr
+  monitor_mode: max
+  base_learning_rate: 1.0e-05
+  params:
+    linear_start: 0.1
+    linear_end: 0.99
+    log_every_t: 200
+    timesteps: 4
+    loss_type: l2
+    parameterization: eps
+    first_stage_key: hr
+    cond_stage_key: lr
+    image_size: 64 # Not used
+    scale_by_std: true
+    channels: 4
+    cond_stage_trainable: true
+    conditioning_key: hybrid_adm
+    unet_config:
+      target: modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 64 # No used
+        in_channels: 8
+        out_channels: 4
+        model_channels: 64
+        attention_resolutions: [8]
+        num_res_blocks: 2
+        channel_mult: [1, 2, 2, 4]
+        num_head_channels: 32
+        use_scale_embedding: true
+        use_osize_embedding: true
+    first_stage_config:
+      target: models.first_stage_kl_atom.AutoencoderKL
+      params:
+          embed_dim: 4
+          ckpt_path: logs/first_stage_kl_v6/2024-10-11T22-27-56/checkpoints/epoch=779-best.ckpt
+          lossconfig:
+          encoder_config:
+            target: modules.e2sr.s1_v6.GAPEncoder
+            params:
+              in_channels: 6
+              ch: 64
+              ch_mult: [1, 2, 2, 4]
+              num_res_blocks: 2
+              attn_resolutions: []
+              z_channels: 4
+              double_z: true
+          decoder_config:
+            target: modules.e2sr.s1_v6.GAPDecoder
+            params:
+              ch: 64
+              out_ch: 3
+              ch_mult: [1, 1, 1, 1]
+              num_res_blocks: 2
+              attn_resolutions: []
+              z_channels: 4
+              in_channels: 3
+              num_sr_modules: [12, 12, 12, 12]
+    cond_stage_config: 
+      target: modules.e2sr.s1_v6.GAPEncoder
+      params:
+        in_channels: 3
+        ch: 64
+        ch_mult: [1, 2, 2, 4]
+        num_res_blocks: 2
+        attn_resolutions: []
+        z_channels: 4
+        double_z: false
+data:
+  target: data.datamodule.DataModuleFromConfig
+  params:
+    batch_size: 8
+    num_workers: 16
+    wrap: false
+    train:
+      target: data.downsampled_dataset.MultiScaleDownsampledDatasetWithFixedHRSize
+      params:
+        datapath: load/AID_split/train/HR
+        min_scale: 1
+        max_scale: 8
+        is_train: true
+        hr_img_sz: 256
+        cache: memory
+        data_length: 8000
+        batch_size: 8
+    validation:
+      target: data.downsampled_dataset.DownsampledDataset
+      params:
+        datapath: load/AID_split/val/HR
+        scale: 4
+        is_train: false
+        first_k: 2
+        cache: memory
+
+#################################
+##  Configs for the Lightning  ##
+#################################
+lightning:
+  trainer:
+    max_epochs: 1000
+    reload_dataloaders_every_n_epochs: 1

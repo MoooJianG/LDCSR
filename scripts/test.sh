@@ -1,0 +1,2 @@
+python test.py --checkpoint logs/second_stage_van_v4/2024-10-15T23-01-49/checkpoints/epoch=0344-metric=24.01.ckpt --datasets AID --scales 2.6,3.0,3.4,4.0,6.0,8.0,10.0
+python test.py --checkpoint logs/second_stage_van_v4/2024-10-15T23-01-49/checkpoints/epoch=0344-metric=24.01.ckpt --datasets DIOR,DOTA_512 --scales 2.0,2.6,3.0,3.4,4.0,6.0,8.0,10.0
