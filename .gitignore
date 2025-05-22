@@ -125,3 +125,15 @@ logs_local
 logs-local
 *py.bak_*
 taming
+
+# Code
+checksize.py
+eval/*
+
+config/*
+!config/first_stage_kl_v6.yaml
+!config/second_stage_van_v4.yaml
+
+config/bak/
+
+scripts/*
