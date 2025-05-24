@@ -130,11 +130,11 @@ taming
 checksize.py
 eval/*
 
-config/*
-!config/first_stage_kl_v6.yaml
-!config/second_stage_van_v4.yaml
+configs/*
+!configs/first_stage_kl_v6.yaml
+!configs/second_stage_van_v4.yaml
 
-config/bak/
+configs/bak/
 
 scripts/*
 
