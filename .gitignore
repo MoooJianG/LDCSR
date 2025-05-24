@@ -137,3 +137,6 @@ config/*
 config/bak/
 
 scripts/*
+
+.DS_Store
+

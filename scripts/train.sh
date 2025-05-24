@@ -1,1 +1,0 @@
-python train.py --config configs/diff_blindsr3_aniso_atom_rrdb_wo_c.yaml --gpus 1

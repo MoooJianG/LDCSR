@@ -1,0 +1,88 @@
+model:
+  target: models.second_stage_v4.S2Model
+  monitor: val/loss
+  monitor_mode: min
+  base_learning_rate: 2.0e-05
+  params:
+    diff_config:
+      beta_type: cosine
+      beta_start: 0.0001
+      beta_end: 0.02
+      n_timestep: 1000
+      model_var_type: fixedlarge
+      model_mean_type: xstart
+      t_encode_mode: continuous
+    first_stage_config:
+      target: models.first_stage_kl_atom.AutoencoderKL
+      params:
+          embed_dim: 3
+          ckpt_path: logs/first_stage_kl_v7c/2024-05-28T22-32-16/checkpoints/last.ckpt
+          lossconfig:
+          encoder_config:
+            target: modules.e2sr.s1_v7c.Encoder
+            params:
+              in_channels: 3
+              ch: 64
+              ch_mult: [1, 2, 4, 4]
+              num_res_blocks: 2
+              attn_resolutions: []
+              z_channels: 3
+              double_z: true
+          decoder_config:
+            target: modules.e2sr.s1_v7c.MultiScaleDecoder
+            params:
+              ch: 64
+              out_ch: 3
+              ch_mult: [1, 2, 4, 4]
+              num_res_blocks: 2
+              attn_resolutions: []
+              z_channels: 3
+              in_channels: 3
+    cond_stage_config: __identity__
+    unet_config:
+      target: modules.denoisers.unet_atom.UNetAtom
+      params:
+        in_channel: 3
+        out_channel: 3
+        inner_channel: 128
+        channel_mults: [1, 2, 2, 4]
+        res_blocks: 2
+        attn_strides: [16] # 16 == None
+        dropout: 0
+data:
+  target: data.datamodule.DataModuleFromConfig
+  params:
+    batch_size: 4
+    num_workers: 8
+    wrap: false
+    train:
+      target: data.downsampled_dataset.MultiScaleDownsampledDataset
+      params:
+        datapath: load/AID
+        split_file_path: data/AID_split.pkl
+        split: train
+        min_scale: 4
+        max_scale: 4
+        is_train: true
+        lr_img_sz: 64
+        cache: memory
+        data_length: 4000
+        batch_size: 4
+    validation:
+      target: data.downsampled_dataset.DownsampledDataset
+      params:
+        datapath: load/AID
+        split_file_path: data/AID_split.pkl
+        split: val
+        scale: 4
+        is_train: false
+        first_k: 2
+        cache: memory
+
+#################################
+##  Configs for the Lightning  ##
+#################################
+lightning:
+  trainer:
+    max_epochs: 400
+    reload_dataloaders_every_n_epochs: 1
