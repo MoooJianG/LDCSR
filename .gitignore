@@ -140,3 +140,63 @@ scripts/*
 
 .DS_Store
 
+# ===== Deep Learning / PyTorch =====
+# Model checkpoints
+*.ckpt
+*.pth
+*.pt
+*.safetensors
+checkpoints/
+
+# Training outputs
+outputs/
+results/
+runs/
+wandb/
+
+# TensorBoard
+tensorboard/
+events.out.tfevents.*
+
+# ===== Data =====
+# Large datasets (keep structure, ignore data)
+dataset/
+datasets/
+*.h5
+*.hdf5
+*.npy
+!data/AID_split.pkl
+
+# Images (generated/downloaded)
+*.png
+*.jpg
+*.jpeg
+*.tif
+*.tiff
+!asserts/*.png
+
+# ===== IDE / Editor =====
+.idea/
+*.swp
+*.swo
+*~
+
+# ===== Serena =====
+.serena/
+
+# ===== Kiro =====
+.kiro/
+
+# ===== Markdown (except readme) =====
+*.md
+!readme.md
+!README.md
+
+# ===== Misc =====
+*.bak
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
